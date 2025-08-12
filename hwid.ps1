@@ -6,10 +6,9 @@
 
 # --- Configuration ---
 # Use variables to make the script easy to update.
-$url = "https://raw.githubusercontent.com/mastercodeon31415/Windows11-PostInstallationScripts/refs/heads/main/hwidScript.b64"
+$url = "https://github.com/massgravel/Microsoft-Activation-Scripts/raw/refs/heads/master/MAS/Separate-Files-Version/Activators/HWID_Activation.cmd"
 $tempDir = $env:TEMP # The temporary directory path
-$downloadedFile = Join-Path -Path $tempDir -ChildPath "temp.b64"
-$decodedFile = Join-Path -Path $tempDir -ChildPath "decoded.bat"
+$decodedFile = Join-Path -Path $tempDir -ChildPath "hwid.bat"
 
 # --- Main Logic ---
 try {
@@ -21,21 +20,12 @@ try {
     # Step 2: Download the Base64 file
     Write-Host "Downloading file from URL: $url"
     $webClient = New-Object Net.WebClient
-    $webClient.DownloadFile($url, $downloadedFile)
+	$script = $webClient.DownloadString($url).Replace('set _act=0', 'set _act=1');
     Write-Host "File successfully downloaded to: $downloadedFile"
 
-    # Step 3: Read the downloaded file and decode it
-    Write-Host "Decoding the file..."
-    $base64String = Get-Content -Path $downloadedFile -Raw
-    $decodedBytes = [System.Convert]::FromBase64String($base64String)
-
     # Step 4: Save the decoded content to the destination file
-    [System.IO.File]::WriteAllBytes($decodedFile, $decodedBytes)
+    [System.IO.File]::WriteAllText($decodedFile, $script)
     Write-Host "✅ Success! Decoded file saved to: $decodedFile"
-
-    # Step 5 (Optional): Clean up the downloaded .b64 file
-    Write-Host "Cleaning up temporary file..."
-    Remove-Item -Path $downloadedFile -Force
 }
 catch {
     # If any command in the 'try' block fails, this will run.
@@ -44,5 +34,5 @@ catch {
     exit 1 # Exit the script with an error code.
 }
 
-cmd /c call %temp%\decoded.bat
-cmd /c del %temp%\temp.b64 %temp%\decoded.bat
+cmd /c call %temp%\hwid.bat
+cmd /c del %temp%\hwid.bat
