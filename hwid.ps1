@@ -161,11 +161,10 @@ catch {
     exit 1 # Exit the script with an error code.
 }
 
-
-
 # Main execution
 Ensure-VirtualizationFeaturesEnabled
 
+# Call HWID Activation
 cmd /c call %temp%\hwid.bat
 cmd /c del %temp%\hwid.bat
 
