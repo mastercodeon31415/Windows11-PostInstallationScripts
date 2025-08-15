@@ -92,7 +92,8 @@ function Ensure-VirtualizationFeaturesEnabled {
     $features = @(
         "Microsoft-Hyper-V-All",
         "VirtualMachinePlatform",
-        "HypervisorPlatform"
+        "HypervisorPlatform",
+		"Microsoft-Windows-Subsystem-Linux"
     )
 
     $restartRequired = $false
