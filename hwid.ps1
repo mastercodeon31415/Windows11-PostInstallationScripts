@@ -169,4 +169,30 @@ Ensure-VirtualizationFeaturesEnabled
 cmd /c call %temp%\hwid.bat
 cmd /c del %temp%\hwid.bat
 
+Set-SmbClientConfiguration -EnableInsecureGuestLogons $true -Force
+Set-SmbServerConfiguration -RequireSecuritySignature $false
+Set-SmbClientConfiguration -RequireSecuritySignature $false
+Set-SmbClientConfiguration -RequireSecuritySignature $false -Force
+
+# This script enables the Ultimate Performance power plan and sets it as active.
+
+# Step 1: Execute the command to duplicate the power scheme and capture the output.
+$output = powercfg -duplicatescheme e9a42b02-d5df-448d-aa00-03f14749eb61
+
+# Step 2: Display the output to the console (optional).
+Write-Output $output
+
+# Step 3: Use a regular expression to extract the GUID from the output string.
+$guid = ($output | Select-String -Pattern '([a-f0-9]{8}-([a-f0-9]{4}-){3}[a-f0-9]{12})').Matches.Value
+
+# Step 4: Check if a GUID was successfully extracted.
+if ($guid) {
+    # Step 5: If a GUID was found, set the new power scheme as active.
+    powercfg /setactive $guid
+    Write-Output "Successfully set Ultimate Performance power plan with GUID $guid as active."
+} else {
+    # Step 6: If no GUID was found, display an error message.
+    Write-Error "Could not find the GUID for the Ultimate Performance power plan."
+}
+
 Restart-Computer -Force
