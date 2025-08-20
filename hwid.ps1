@@ -162,6 +162,8 @@ catch {
     exit 1 # Exit the script with an error code.
 }
 
+DISM /Online /Add-Capability /CapabilityName:App.WirelessDisplay.Connect~~~~0.0.1.0
+
 # Main execution
 Ensure-VirtualizationFeaturesEnabled
 
