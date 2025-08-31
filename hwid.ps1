@@ -199,4 +199,7 @@ if ($guid) {
     Write-Error "Could not find the GUID for the Ultimate Performance power plan."
 }
 
+# Disable superfetch to save on system resources
+sc stop "SysMain" & sc config "SysMain" start=disabled
+
 Restart-Computer -Force
