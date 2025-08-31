@@ -422,7 +422,7 @@ $restartIsNeeded = $false
 if (Enable-VirtualizationFeatures) { $restartIsNeeded = $true }
 Apply-PerformanceAndRegistryTweaks
 Attempt-WindowsActivation
-Install-OptionalFeatures
+#Install-OptionalFeatures
 Configure-PowerSettings
 if (Optimize-SystemPerformance) { $restartIsNeeded = $true }
 Configure-NetworkSharing
