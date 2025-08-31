@@ -429,11 +429,12 @@ Configure-NetworkSharing
 
 # VMWare Tools silent installation
 $filePath = "C:\VMware-tools-windows-13.0.1-24843032\setup.exe"
-$arguments = " " # "/s /v/qn"
+$arguments = "/s /v/qn"
 # Check if the file exists
 if (Test-Path $filePath) {
     # If the file exists, run it with arguments
-    Start-Process $filePath -ArgumentList $arguments
+    #Start-Process $filePath -ArgumentList $arguments
+	Start-Process $filePath
 } else {
     Write-Host "File does not exist."
 }
