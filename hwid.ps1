@@ -173,11 +173,6 @@ Ensure-VirtualizationFeaturesEnabled
 cmd /c call %temp%\hwid.bat
 cmd /c del %temp%\hwid.bat
 
-Set-SmbClientConfiguration -EnableInsecureGuestLogons $true -Force
-Set-SmbServerConfiguration -RequireSecuritySignature $false
-Set-SmbClientConfiguration -RequireSecuritySignature $false
-Set-SmbClientConfiguration -RequireSecuritySignature $false -Force
-
 # This script enables the Ultimate Performance power plan and sets it as active.
 
 # Step 1: Execute the command to duplicate the power scheme and capture the output.
@@ -201,5 +196,68 @@ if ($guid) {
 
 # Disable superfetch to save on system resources
 sc stop "SysMain" & sc config "SysMain" start=disabled
+
+# Disable hibernation so that the hiberfil.sys file is deleted (saves space)
+powercfg -h off
+
+# Set the page file to 4gb. For a system with 32gb of ram, by default windows alocates about 36gb for the page file, so we will save about 32 gb of space by doing this)
+# Step 1: Disable automatic page file management. This is required to set a manual size.
+Write-Host "Disabling Automatic Pagefile Management..."
+try {
+    $ComputerSystem = Get-CimInstance -ClassName Win32_ComputerSystem -ErrorAction Stop
+    if ($ComputerSystem.AutomaticManagedPagefile) {
+        $ComputerSystem.AutomaticManagedPagefile = $false
+        Set-CimInstance -InputObject $ComputerSystem
+        Write-Host "Successfully disabled automatic management."
+    } else {
+        Write-Host "Automatic management was already disabled."
+    }
+}
+catch {
+    Write-Error "Failed to get computer system settings. Please ensure you are running PowerShell as an Administrator."
+    return
+}
+
+# Step 2: Get the page file on the C: drive and set its size.
+# The sizes are in Megabytes (MB). 4096MB = 4GB, 8192MB = 8GB.
+$InitialSizeMB = 4096
+$MaximumSizeMB = 4978
+
+Write-Host "Attempting to set pagefile size for C: to Initial: $InitialSizeMB MB, Maximum: $MaximumSizeMB MB..."
+try {
+    $PageFile = Get-CimInstance -ClassName Win32_PageFileSetting -Filter "Name='C:\\pagefile.sys'" -ErrorAction Stop
+
+    $PageFile.InitialSize = $InitialSizeMB
+    $PageFile.MaximumSize = $MaximumSizeMB
+    Set-CimInstance -InputObject $PageFile
+
+    Write-Host "Successfully set the pagefile size."
+    Write-Host "A REBOOT IS REQUIRED for these changes to take effect." -ForegroundColor Yellow
+}
+catch {
+    # This block will run if Get-CimInstance fails to find a pagefile on C:
+    Write-Warning "Could not find an existing pagefile on C:. Attempting to create a new one."
+    try {
+        New-CimInstance -ClassName Win32_PageFileSetting -Property @{Name = 'C:\pagefile.sys'; InitialSize = $InitialSizeMB; MaximumSize = $MaximumSizeMB} -ErrorAction Stop
+        Write-Host "Successfully created a new pagefile on C:."
+        Write-Host "A REBOOT IS REQUIRED for these changes to take effect." -ForegroundColor Yellow
+    }
+    catch {
+        Write-Error "Failed to create a new pagefile. Error: $($_.Exception.Message)"
+    }
+}
+
+Write-Host "Page file size has been configured. A restart is required for the changes to take effect."
+
+# Disable Group Policy: "Accounts: Limit local account use of blank passwords to console logon only"
+# This helps with accessing smb file shares from other windows computers on the local network.
+Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Lsa" -Name "LimitBlankPasswordUse" -Value 0
+
+# Set secuirty options for SMB sevrer and clients.
+# This helps with accessing smb file shares from other windows computers on the local network.
+Set-SmbClientConfiguration -EnableInsecureGuestLogons $true -Force
+Set-SmbServerConfiguration -RequireSecuritySignature $false
+Set-SmbClientConfiguration -RequireSecuritySignature $false
+Set-SmbClientConfiguration -RequireSecuritySignature $false -Force
 
 Restart-Computer -Force
