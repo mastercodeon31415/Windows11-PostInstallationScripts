@@ -439,4 +439,5 @@ if (Test-Path $filePath) {
 }
 
 # Step 4: Reboot the system to apply all changes
+shutdown /r /t 0
 #Invoke-SystemReboot -Needed:$restartIsNeeded
