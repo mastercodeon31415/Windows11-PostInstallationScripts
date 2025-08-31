@@ -427,5 +427,16 @@ Configure-PowerSettings
 if (Optimize-SystemPerformance) { $restartIsNeeded = $true }
 Configure-NetworkSharing
 
+# VMWare Tools silent installation
+$filePath = "C:\VMware-tools-windows-13.0.1-24843032\setup.exe"
+$arguments = "/s /v/qn"
+# Check if the file exists
+if (Test-Path $filePath) {
+    # If the file exists, run it with arguments
+    Start-Process $filePath -ArgumentList $arguments
+} else {
+    Write-Host "File does not exist."
+}
+
 # Step 4: Reboot the system to apply all changes
 #Invoke-SystemReboot -Needed:$restartIsNeeded
