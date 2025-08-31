@@ -433,8 +433,7 @@ $arguments = "/s /v/qn"
 # Check if the file exists
 if (Test-Path $filePath) {
     # If the file exists, run it with arguments
-    #Start-Process $filePath -ArgumentList $arguments
-	Start-Process $filePath
+    Start-Process $filePath -ArgumentList $arguments
 } else {
     Write-Host "File does not exist."
 }
