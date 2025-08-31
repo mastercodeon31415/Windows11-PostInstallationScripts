@@ -90,11 +90,9 @@ function Enable-Feature {
 
 function Ensure-VirtualizationFeaturesEnabled {
     $features = @(
-        # "Microsoft-Hyper-V-All",
-        # "VirtualMachinePlatform",
-        # "HypervisorPlatform",
-		# "Microsoft-Windows-Subsystem-Linux"
-		
+        "Microsoft-Hyper-V-All",
+        "VirtualMachinePlatform",
+        "HypervisorPlatform",
 		"Microsoft-Windows-Subsystem-Linux"
     )
 
