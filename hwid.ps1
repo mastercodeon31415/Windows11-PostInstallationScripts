@@ -195,7 +195,7 @@ if ($guid) {
 }
 
 # Disable superfetch to save on system resources
-sc stop "SysMain" & sc config "SysMain" start=disabled
+cmd /c sc stop "SysMain" "&&" sc config "SysMain" start=disabled
 
 # Disable hibernation so that the hiberfil.sys file is deleted (saves space)
 powercfg -h off
