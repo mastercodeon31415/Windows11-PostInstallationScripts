@@ -396,7 +396,7 @@ function Invoke-SystemReboot {
     
     Write-Host "The computer will restart in 10 seconds. Press Ctrl+C to abort." -ForegroundColor Red
     Start-Sleep -Seconds 10
-    Restart-Computer -Force
+    shutdown /r /t 0
 }
 
 
@@ -439,5 +439,5 @@ if (Test-Path $filePath) {
 }
 
 # Step 4: Reboot the system to apply all changes
-shutdown /r /t 0
-#Invoke-SystemReboot -Needed:$restartIsNeeded
+
+#Invoke-SystemReboot -Needed:$true
