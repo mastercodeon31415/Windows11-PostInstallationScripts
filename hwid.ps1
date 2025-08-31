@@ -428,4 +428,4 @@ if (Optimize-SystemPerformance) { $restartIsNeeded = $true }
 Configure-NetworkSharing
 
 # Step 4: Reboot the system to apply all changes
-Invoke-SystemReboot -Needed:$restartIsNeeded
+#Invoke-SystemReboot -Needed:$restartIsNeeded
