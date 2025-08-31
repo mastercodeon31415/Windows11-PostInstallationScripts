@@ -419,9 +419,9 @@ Write-Host "================================================="
 # Step 3: Execute configuration functions and track if a restart is needed
 $restartIsNeeded = $false
 
-#if (Enable-VirtualizationFeatures) { $restartIsNeeded = $true }
+if (Enable-VirtualizationFeatures) { $restartIsNeeded = $true }
 Apply-PerformanceAndRegistryTweaks
-#Attempt-WindowsActivation
+Attempt-WindowsActivation
 Install-OptionalFeatures
 Configure-PowerSettings
 if (Optimize-SystemPerformance) { $restartIsNeeded = $true }
