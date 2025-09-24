@@ -193,6 +193,14 @@ function Apply-PerformanceAndRegistryTweaks {
         # Tweak: Enable checkboxes in File Explorer
         Write-Host "Applying tweak: Enabling File Explorer checkboxes..." -ForegroundColor Cyan
         Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced" -Name "AutoCheckSelect" -Value 1 -Type DWord -Force
+		
+        # Tweak: Enable showing of file extensions in File Explorer
+        Write-Host "Applying tweak: Enabling File Explorer show file extensions..." -ForegroundColor Cyan
+        Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced" -Name "HideFileExt" -Value 0 -Type DWord -Force
+		
+		# Tweak: Enable showing of hidden files in File Explorer
+        Write-Host "Applying tweak: Enabling File Explorer show hidden files..." -ForegroundColor Cyan
+        Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced" -Name "Hidden" -Value 1 -Type DWord -Force
 
         # Tweak: Enable Developer Mode
         Write-Host "Applying tweak: Enabling Developer Mode..." -ForegroundColor Cyan
@@ -419,7 +427,7 @@ Write-Host "================================================="
 # Step 3: Execute configuration functions and track if a restart is needed
 $restartIsNeeded = $false
 
-if (Enable-VirtualizationFeatures) { $restartIsNeeded = $true }
+# if (Enable-VirtualizationFeatures) { $restartIsNeeded = $true }
 Apply-PerformanceAndRegistryTweaks
 Attempt-WindowsActivation
 #Install-OptionalFeatures
@@ -428,15 +436,15 @@ if (Optimize-SystemPerformance) { $restartIsNeeded = $true }
 Configure-NetworkSharing
 
 # VMWare Tools silent installation
-$filePath = "C:\VMware-tools-windows-13.0.1-24843032\setup.exe"
-$arguments = "/s /v/qn"
+# $filePath = "C:\VMware-tools-windows-13.0.1-24843032\setup.exe"
+# $arguments = "/s /v/qn"
 # Check if the file exists
-if (Test-Path $filePath) {
+# if (Test-Path $filePath) {
     # If the file exists, run it with arguments
-    Start-Process $filePath -ArgumentList $arguments
-} else {
-    Write-Host "File does not exist."
-}
+    # Start-Process $filePath -ArgumentList $arguments
+# } else {
+    # Write-Host "File does not exist."
+# }
 
 # Step 4: Reboot the system to apply all changes
 
