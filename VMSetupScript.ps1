@@ -410,17 +410,18 @@ function Invoke-SystemReboot {
 function Install-VMWareToolsFromUrl {
     <#
     .SYNOPSIS
-    Downloads a zip file from a specified URL and extracts its contents to C:\VMWare_Tools.
+    Downloads, installs, and cleans up VMWare Tools from a zip URL.
 
     .DESCRIPTION
-    This function takes a URL to a zip file as input. It creates a directory named "VMWare_Tools" at the root of the C: drive if it doesn't already exist. It then downloads the zip file into this directory and extracts its contents there.
+    This function downloads a zip file from a specified URL, extracts its contents to a temporary directory (C:\VMWare_Tools),
+    runs the silent installation, waits for the installation to complete, and then removes both the downloaded zip file and the temporary directory.
 
     .PARAMETER Url
-    The URL of the zip file to download. This parameter is mandatory.
+    The URL of the VMWare Tools zip file to download. This parameter is mandatory.
 
     .EXAMPLE
     PS C:\> Install-VMWareToolsFromUrl -Url "https://example.com/vmware_tools.zip"
-    This command downloads the vmware_tools.zip file from the specified URL and extracts its contents to C:\VMWare_Tools.
+    This command downloads the VMWare Tools, installs them silently, and cleans up the installation files.
     #>
     [CmdletBinding()]
     param (
@@ -436,44 +437,56 @@ function Install-VMWareToolsFromUrl {
 
     process {
         try {
-            # Check if the destination directory exists, if not, create it.
+            # 1. Create Directory and Download
             if (-not (Test-Path -Path $destinationPath -PathType Container)) {
                 Write-Verbose "Creating directory: $destinationPath"
                 New-Item -Path $destinationPath -ItemType Directory -Force | Out-Null
             }
 
-            # Download the zip file
             Write-Verbose "Downloading VMWare Tools from $Url..."
             Invoke-WebRequest -Uri $Url -OutFile $zipFilePath -UseBasicParsing
 
-            # Extract the contents of the zip file
+            # 2. Extract the contents
             Write-Verbose "Extracting contents of $zipFilePath to $destinationPath..."
             Expand-Archive -Path $zipFilePath -DestinationPath $destinationPath -Force
 
-            Write-Host "VMWare Tools downloaded and extracted successfully to $destinationPath"
-			
-			# VMWare Tools silent installation
-			$filePath = "C:\VMWare_Tools\setup.exe"
-			$arguments = "/s /v/qn"
+            # 3. VMWare Tools silent installation
+            $setupFilePath = Join-Path -Path $destinationPath -ChildPath "setup.exe"
+            $arguments = "/s /v/qn"
 
-			# Check if the file exists
-			if (Test-Path $filePath)
+            if (Test-Path $setupFilePath)
 			{
-				# If the file exists, run it with arguments and wait for it to complete
-				Write-Host "Starting VMWare Tools installation. Please wait..."
-				Start-Process $filePath -ArgumentList $arguments -Wait
-				Write-Host "VMWare Tools installation has completed."
-			}
+                Write-Host "Starting VMWare Tools silent installation. This may take a few minutes..."
+                Start-Process $setupFilePath -ArgumentList $arguments -Wait
+                Write-Host "VMWare Tools installation has completed."
+            }
 			else
 			{
-				Write-Host "File does not exist: $filePath"
-			}
-			
-			Write-Verbose "Cleaning up VMWare Tools installation files..."
+                # If setup.exe is not in the root, try to find it in a subdirectory (common for some versions)
+                $setupFiles = Get-ChildItem -Path $destinationPath -Filter "setup.exe" -Recurse
+                if ($setupFiles)
+				{
+                    $setupFilePath = $setupFiles[0].FullName
+                    Write-Host "Found setup.exe at $setupFilePath"
+                    Write-Host "Starting VMWare Tools silent installation. This may take a few minutes..."
+                    Start-Process $setupFilePath -ArgumentList $arguments -Wait
+                    Write-Host "VMWare Tools installation has completed."
+                }
+				else
+				{
+                     Write-Error "Could not find setup.exe in the extracted files."
+                     # Stop the function if setup.exe isn't found
+                     return
+                }
+            }
+
+            # 4. Cleanup
+            Write-Verbose "Cleaning up VMWare Tools installation files..."
             Remove-Item -Path $destinationPath -Recurse -Force
             Write-Host "VMWare Tools Cleanup complete. The directory $destinationPath and its contents have been removed."
+
         }
-        catch
+        catch 
 		{
             Write-Error "An error occurred: $_"
         }
