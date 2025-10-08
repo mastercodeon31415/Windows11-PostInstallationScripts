@@ -523,6 +523,10 @@ $restartIsNeeded = $false
 # if (Enable-VirtualizationFeatures) { $restartIsNeeded = $true }
 Apply-PerformanceAndRegistryTweaks
 Attempt-WindowsActivation
+
+# Clear Console Screen because the HWID activator dosent do this and leaves its progress bar up.
+Clear-Host
+
 #Install-OptionalFeatures
 Configure-PowerSettings
 if (Optimize-SystemPerformance) { $restartIsNeeded = $true }
