@@ -505,6 +505,8 @@ function Install-VMWareToolsFromUrl {
 # MAIN EXECUTION
 # =============================================================================
 
+$host.UI.RawUI.WindowTitle = "Post Config: Step 1/7"
+
 # Step 1: Ensure the script is running with administrative privileges
 if (-Not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
     Write-Warning "This script requires Administrator privileges. Attempting to re-launch as Admin..."
@@ -522,19 +524,33 @@ $restartIsNeeded = $false
 
 # if (Enable-VirtualizationFeatures) { $restartIsNeeded = $true }
 Apply-PerformanceAndRegistryTweaks
+
+$host.UI.RawUI.WindowTitle = "Post Config: Step 2/7"
+
 Attempt-WindowsActivation
+
+$host.UI.RawUI.WindowTitle = "Post Config: Step 3/7"
 
 # Clear Console Screen because the HWID activator dosent do this and leaves its progress bar up.
 Clear-Host
 
 #Install-OptionalFeatures
 Configure-PowerSettings
+
+$host.UI.RawUI.WindowTitle = "Post Config: Step 4/7"
+
 if (Optimize-SystemPerformance) { $restartIsNeeded = $true }
+
+$host.UI.RawUI.WindowTitle = "Post Config: Step 5/7"
+
 Configure-NetworkSharing
+
+$host.UI.RawUI.WindowTitle = "Post Config: Step 6/7"
 
 # Download VMWare Tools, extract zip and then run a silent install. Cleans up all files for downloaded VMWare Tools zip and extracted installation files. 
 Install-VMWareToolsFromUrl -Url "https://github.com/mastercodeon31415/Windows11-PostInstallationScripts/raw/refs/heads/main/VMware-tools-windows-13.0.1-24843032.zip"
 
-# Step 4: Reboot the system to apply all changes
+$host.UI.RawUI.WindowTitle = "Post Config: Step 7/7"
 
-#Invoke-SystemReboot -Needed:$true
+# Step 4: Reboot the system to apply all changes
+Invoke-SystemReboot -Needed:$true
