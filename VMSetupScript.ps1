@@ -436,6 +436,9 @@ function Install-VMWareToolsFromUrl {
     }
 
     process {
+        # Create a new WebClient object for downloading
+        $webClient = New-Object System.Net.WebClient
+		
         try
 		{
             # 1. Create Directory and Download
@@ -444,8 +447,12 @@ function Install-VMWareToolsFromUrl {
                 New-Item -Path $destinationPath -ItemType Directory -Force | Out-Null
             }
 
-            Write-Verbose "Downloading VMWare Tools from $Url..."
-            Invoke-WebRequest -Uri $Url -OutFile $zipFilePath -UseBasicParsing
+			Write-Host "Downloading VMWare Tools from $Url..."
+			
+            # Use the much faster DownloadFile method
+            $webClient.DownloadFile($Url, $zipFilePath)
+			
+            Write-Host "Download complete."
 
             # 2. Extract the contents
             Write-Verbose "Extracting contents of $zipFilePath to $destinationPath..."
