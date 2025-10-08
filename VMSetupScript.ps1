@@ -436,7 +436,8 @@ function Install-VMWareToolsFromUrl {
     }
 
     process {
-        try {
+        try
+		{
             # 1. Create Directory and Download
             if (-not (Test-Path -Path $destinationPath -PathType Container)) {
                 Write-Verbose "Creating directory: $destinationPath"
@@ -484,7 +485,6 @@ function Install-VMWareToolsFromUrl {
             Write-Verbose "Cleaning up VMWare Tools installation files..."
             Remove-Item -Path $destinationPath -Recurse -Force
             Write-Host "VMWare Tools Cleanup complete. The directory $destinationPath and its contents have been removed."
-
         }
         catch 
 		{
@@ -521,7 +521,7 @@ Configure-PowerSettings
 if (Optimize-SystemPerformance) { $restartIsNeeded = $true }
 Configure-NetworkSharing
 
-# Download VMWare Tools, extract zip and then run a silent install.
+# Download VMWare Tools, extract zip and then run a silent install. Cleans up all files for downloaded VMWare Tools zip and extracted installation files. 
 Install-VMWareToolsFromUrl -Url "https://github.com/mastercodeon31415/Windows11-PostInstallationScripts/raw/refs/heads/main/VMware-tools-windows-13.0.1-24843032.zip"
 
 # Step 4: Reboot the system to apply all changes
