@@ -407,6 +407,79 @@ function Invoke-SystemReboot {
     shutdown /r /t 0
 }
 
+function Install-VMWareToolsFromUrl {
+    <#
+    .SYNOPSIS
+    Downloads a zip file from a specified URL and extracts its contents to C:\VMWare_Tools.
+
+    .DESCRIPTION
+    This function takes a URL to a zip file as input. It creates a directory named "VMWare_Tools" at the root of the C: drive if it doesn't already exist. It then downloads the zip file into this directory and extracts its contents there.
+
+    .PARAMETER Url
+    The URL of the zip file to download. This parameter is mandatory.
+
+    .EXAMPLE
+    PS C:\> Install-VMWareToolsFromUrl -Url "https://example.com/vmware_tools.zip"
+    This command downloads the vmware_tools.zip file from the specified URL and extracts its contents to C:\VMWare_Tools.
+    #>
+    [CmdletBinding()]
+    param (
+        [Parameter(Mandatory = $true, HelpMessage = "Please provide the URL for the VMWare Tools zip file.")]
+        [string]$Url
+    )
+
+    begin {
+        $destinationPath = "C:\VMWare_Tools"
+        $zipFileName = Split-Path -Path $Url -Leaf
+        $zipFilePath = Join-Path -Path $destinationPath -ChildPath $zipFileName
+    }
+
+    process {
+        try {
+            # Check if the destination directory exists, if not, create it.
+            if (-not (Test-Path -Path $destinationPath -PathType Container)) {
+                Write-Verbose "Creating directory: $destinationPath"
+                New-Item -Path $destinationPath -ItemType Directory -Force | Out-Null
+            }
+
+            # Download the zip file
+            Write-Verbose "Downloading VMWare Tools from $Url..."
+            Invoke-WebRequest -Uri $Url -OutFile $zipFilePath -UseBasicParsing
+
+            # Extract the contents of the zip file
+            Write-Verbose "Extracting contents of $zipFilePath to $destinationPath..."
+            Expand-Archive -Path $zipFilePath -DestinationPath $destinationPath -Force
+
+            Write-Host "VMWare Tools downloaded and extracted successfully to $destinationPath"
+			
+			# VMWare Tools silent installation
+			$filePath = "C:\VMWare_Tools\setup.exe"
+			$arguments = "/s /v/qn"
+
+			# Check if the file exists
+			if (Test-Path $filePath)
+			{
+				# If the file exists, run it with arguments and wait for it to complete
+				Write-Host "Starting VMWare Tools installation. Please wait..."
+				Start-Process $filePath -ArgumentList $arguments -Wait
+				Write-Host "VMWare Tools installation has completed."
+			}
+			else
+			{
+				Write-Host "File does not exist: $filePath"
+			}
+			
+			Write-Verbose "Cleaning up VMWare Tools installation files..."
+            Remove-Item -Path $destinationPath -Recurse -Force
+            Write-Host "VMWare Tools Cleanup complete. The directory $destinationPath and its contents have been removed."
+        }
+        catch
+		{
+            Write-Error "An error occurred: $_"
+        }
+    }
+}
+
 
 # =============================================================================
 # MAIN EXECUTION
@@ -435,16 +508,8 @@ Configure-PowerSettings
 if (Optimize-SystemPerformance) { $restartIsNeeded = $true }
 Configure-NetworkSharing
 
-# VMWare Tools silent installation
-$filePath = "C:\VMware-tools-windows-13.0.1-24843032\setup.exe"
-$arguments = "/s /v/qn"
-# Check if the file exists
-if (Test-Path $filePath) {
-    # If the file exists, run it with arguments
-    Start-Process $filePath -ArgumentList $arguments
-} else {
-    Write-Host "File does not exist."
-}
+# Download VMWare Tools, extract zip and then run a silent install.
+Install-VMWareToolsFromUrl -Url "https://github.com/mastercodeon31415/Windows11-PostInstallationScripts/raw/refs/heads/main/VMware-tools-windows-13.0.1-24843032.zip"
 
 # Step 4: Reboot the system to apply all changes
 
