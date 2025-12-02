@@ -153,7 +153,18 @@ function Apply-PerformanceAndRegistryTweaks {
     try {
         # Tweak: Speed up shutdown time
         Write-Host "Applying tweak: Speeding up shutdown time..." -ForegroundColor Cyan
-        Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control" -Name "WaitToKillServiceTimeout" -Value 500 -Type String -Force
+		# AutoEndTasks: Automatically ends programs that are not responding
+		Set-ItemProperty -Path "HKCU:\Control Panel\Desktop" -Name "AutoEndTasks" -Value "1"
+
+		# HungAppTimeout: Reduces the time to wait before considering an app "hung" (500ms)
+		Set-ItemProperty -Path "HKCU:\Control Panel\Desktop" -Name "HungAppTimeout" -Value "500"
+
+		# WaitToKillAppTimeout: Reduces the time to wait for apps to close at shutdown (500ms)
+		Set-ItemProperty -Path "HKCU:\Control Panel\Desktop" -Name "WaitToKillAppTimeout" -Value "500"
+
+		# WaitToKillServiceTimeout: Reduces the time to wait for services to stop at shutdown (500ms)
+		# Note: This command requires running PowerShell as Administrator
+		Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control" -Name "WaitToKillServiceTimeout" -Value "500"
 
         # Tweak: Optimize system responsiveness
         Write-Host "Applying tweak: Optimizing system responsiveness..." -ForegroundColor Cyan
@@ -210,19 +221,6 @@ function Apply-PerformanceAndRegistryTweaks {
         Write-Host "Applying tweak: Removing application startup delay..." -ForegroundColor Cyan
         New-Item -Path "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Serialize" -Force | Out-Null
         Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Serialize" -Name "StartupDelayInMSec" -Value 0 -Type DWord -Force
-		
-		# AutoEndTasks: Automatically ends programs that are not responding
-		Set-ItemProperty -Path "HKCU:\Control Panel\Desktop" -Name "AutoEndTasks" -Value "1"
-
-		# HungAppTimeout: Reduces the time to wait before considering an app "hung" (750ms)
-		Set-ItemProperty -Path "HKCU:\Control Panel\Desktop" -Name "HungAppTimeout" -Value "750"
-
-		# WaitToKillAppTimeout: Reduces the time to wait for apps to close at shutdown (750ms)
-		Set-ItemProperty -Path "HKCU:\Control Panel\Desktop" -Name "WaitToKillAppTimeout" -Value "750"
-
-		# WaitToKillServiceTimeout: Reduces the time to wait for services to stop at shutdown (750ms)
-		# Note: This command requires running PowerShell as Administrator
-		Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control" -Name "WaitToKillServiceTimeout" -Value "750"
 		
 		# 1. Create the key if it doesn't exist
 		if (!(Test-Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Personalization")) {
