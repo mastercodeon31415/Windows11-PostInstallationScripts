@@ -210,6 +210,27 @@ function Apply-PerformanceAndRegistryTweaks {
         Write-Host "Applying tweak: Removing application startup delay..." -ForegroundColor Cyan
         New-Item -Path "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Serialize" -Force | Out-Null
         Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Serialize" -Name "StartupDelayInMSec" -Value 0 -Type DWord -Force
+		
+		# AutoEndTasks: Automatically ends programs that are not responding
+		Set-ItemProperty -Path "HKCU:\Control Panel\Desktop" -Name "AutoEndTasks" -Value "1"
+
+		# HungAppTimeout: Reduces the time to wait before considering an app "hung" (750ms)
+		Set-ItemProperty -Path "HKCU:\Control Panel\Desktop" -Name "HungAppTimeout" -Value "750"
+
+		# WaitToKillAppTimeout: Reduces the time to wait for apps to close at shutdown (750ms)
+		Set-ItemProperty -Path "HKCU:\Control Panel\Desktop" -Name "WaitToKillAppTimeout" -Value "750"
+
+		# WaitToKillServiceTimeout: Reduces the time to wait for services to stop at shutdown (750ms)
+		# Note: This command requires running PowerShell as Administrator
+		Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control" -Name "WaitToKillServiceTimeout" -Value "750"
+		
+		# 1. Create the key if it doesn't exist
+		if (!(Test-Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Personalization")) {
+			New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Personalization" -Force | Out-Null
+		}
+
+		# 2. Set the NoLockScreen value to 1 (DWORD)
+		Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Personalization" -Name "NoLockScreen" -Value 1 -Type DWord
 
         Write-Host "All registry tweaks applied successfully." -ForegroundColor Green
     }

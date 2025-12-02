@@ -1,0 +1,3 @@
+Vivetool /enable /id:47205210,49221331,49381526,49402389,49820095,55495322
+
+enables new statt menu in windows 11. 
